@@ -35,6 +35,7 @@
     <blockquote class="explanation">
       <strong>¿Cómo funciona?</strong>
       <p>{{ challenges[current_challenge].explicacion }}</p>
+      <img class="truth-table" *ngIf="challenges[current_challenge].truth_table_img" [src]="challenges[current_challenge].truth_table_img" alt="Tabla de verdad" />
     </blockquote>
 
   </div>

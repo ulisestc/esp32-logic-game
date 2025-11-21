@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="120">
+  <style>
+    .title { font: 16px monospace; font-weight: bold }
+    .cell { font: 14px monospace }
+  </style>
+  <rect width="100%" height="100%" fill="#fff"/>
+  <text x="14" y="28" class="title">NOT (A | OUT)</text>
+
+  <text x="20" y="58" class="cell">0 | 1</text>
+  <text x="20" y="88" class="cell">1 | 0</text>
+</svg>
