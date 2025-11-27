@@ -1,4 +1,3 @@
-/* --- Estilo Base Terminal/Retro --- */
 body, html {
   margin: 0;
   padding: 0;
@@ -12,17 +11,15 @@ body, html {
   min-height: 100vh;
 }
 
-/* --- Contenedor (Tarjeta) --- */
 .card {
   background: #000;
-  border-radius: 0; /* Sin esquinas redondeadas */
-  box-shadow: none; /* Sin sombras */
-  border: 1px solid #FFF; /* Bordes blancos */
+  border-radius: 0;
+  box-shadow: none;
+  border: 1px solid #FFF;
   padding: 1.5rem;
   margin-bottom: 1rem;
 }
 
-/* --- Botones --- */
 button {
   padding: 0.5rem 1rem;
   font-size: 1rem;
@@ -33,13 +30,13 @@ button {
   color: #FFF;
   cursor: pointer;
   transition: all 0.1s ease-in-out;
-  
+
   &:hover {
     background-color: #FFF;
     color: #000;
     font-weight: bold;
   }
-  
+
   &:disabled {
     background-color: #222;
     color: #555;
@@ -48,7 +45,6 @@ button {
   }
 }
 
-/* --- Inputs de Texto --- */
 input[type="text"] {
   background: #111;
   color: #FFF;

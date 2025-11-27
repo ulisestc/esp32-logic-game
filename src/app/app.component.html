@@ -1,97 +1,101 @@
 <div class="modal-overlay" *ngIf="showModal">
   <div class="modal-content">
-    <h2>¡Reto {{ current_challenge }} Completado!</h2>
+    <h2>¡{{ currentChallengeObj.nombre }} Completado!</h2>
+    <p>¡Excelente trabajo!</p>
     <button (click)="advanceToNextLevel()">Siguiente Nivel</button>
   </div>
 </div>
 
 <div class="app-container">
-  
+
   <div class="card connection-frame">
     <h3>Conexión</h3>
     <div class="ip-group">
       <label for="ip">IP del ESP32:</label>
-      <input 
-        id="ip" 
-        type="text" 
-        [(ngModel)]="esp32_ip" 
-        [disabled]="is_polling">
+      <input id="ip" type="text" [(ngModel)]="esp32_ip" [disabled]="is_polling">
       <button (click)="startPolling()" [disabled]="is_polling">
         {{ is_polling ? 'Conectado' : 'Conectar' }}
       </button>
     </div>
     <div class="status">
-      Estado: 
+      Estado:
       <span [ngClass]="is_connected ? 'connected' : 'disconnected'">
         {{ is_connected ? 'Conectado' : 'Desconectado' }}
       </span>
     </div>
   </div>
 
-<div class="card challenge-frame" *ngIf="current_challenge <= 6">
-    <h2>{{ challenges[current_challenge].nombre }}</h2>
-    <p class="instruction">{{ challenges[current_challenge].instruccion }}</p>
-    
+  <!-- Frame del Reto Actual -->
+  <div class="card challenge-frame" *ngIf="current_challenge_index < challenges.length">
+    <h2>{{ currentChallengeObj.nombre }}</h2>
+
+    <div class="expression-display">
+      <code>{{ currentChallengeObj.expression_display }}</code>
+    </div>
+
+    <p class="instruction">{{ currentChallengeObj.instruccion }}</p>
+
     <blockquote class="explanation">
-      <strong>¿Cómo funciona?</strong>
-      <p>{{ challenges[current_challenge].explicacion }}</p>
-      <img class="truth-table" *ngIf="challenges[current_challenge].truth_table_img" [src]="challenges[current_challenge].truth_table_img" alt="Tabla de verdad" />
+      <strong>Ayuda / Explicación:</strong>
+      <p style="white-space: pre-line;">{{ currentChallengeObj.explicacion }}</p>
     </blockquote>
 
+    <div *ngIf="currentChallengeObj.manual_advance" style="margin-top: 1rem; text-align: center;">
+      <button (click)="advanceToNextLevel()">Siguiente Tutorial</button>
+    </div>
   </div>
-  
-  <div class="card challenge-frame" *ngIf="current_challenge > 6">
-    <h2 class="victory">{{ challenges[7].nombre }}</h2>
-    <p class="instruction">{{ challenges[7].instruccion }}</p>
+
+  <!-- Frame de Victoria Final -->
+  <div class="card challenge-frame" *ngIf="current_challenge_index >= challenges.length">
+    <h2 class="victory">{{ victoryChallenge.nombre }}</h2>
+    <p class="instruction">{{ victoryChallenge.instruccion }}</p>
+    <p>{{ victoryChallenge.explicacion }}</p>
+
+    <div style="margin-top: 2rem;">
+      <button class="restart-btn" (click)="restartGame()">Volver a Jugar</button>
+    </div>
   </div>
 
 
   <div class="card status-frame">
-    
+
     <div class="inputs">
       <h4>ENTRADAS (Físicas)</h4>
-      <div 
-        class="button-status" 
-        [class.on]="button_states.boton_a">
+      <div class="button-status" [class.on]="button_states.boton_a">
         BOTÓN A: {{ button_states.boton_a ? 'ON' : 'OFF' }}
       </div>
-      <div 
-        class="button-status" 
-        [class.on]="button_states.boton_b">
+      <div class="button-status" [class.on]="button_states.boton_b">
         BOTÓN B: {{ button_states.boton_b ? 'ON' : 'OFF' }}
       </div>
-      <div 
-        class="button-status" 
-        [class.on]="button_states.boton_c">
+      <div class="button-status" [class.on]="button_states.boton_c">
         BOTÓN C: {{ button_states.boton_c ? 'ON' : 'OFF' }}
       </div>
     </div>
-    
+
     <div class="divider"></div>
 
     <div class="output">
       <h4>SALIDA (Lógica)</h4>
-      <div 
-        class="led-virtual" 
-        [class.on]="current_led_output">
+      <div class="led-virtual" [class.on]="current_led_output">
         LED: {{ current_led_output ? 'ON' : 'OFF' }}
       </div>
-      <div class="led-expected" *ngIf="current_challenge <= 6">
-        Resultado esperado: {{ challenges[current_challenge].led_esperado }}
+      <div class="led-expected" *ngIf="current_challenge_index < challenges.length">
+        Resultado esperado: {{ currentChallengeObj.led_esperado }}
       </div>
     </div>
   </div>
 
   <div class="card progress-frame">
-    <h4>Progreso (GUI)</h4>
+    <h4>Progreso (Niveles Aleatorios)</h4>
     <div class="progress-bar">
-      <div 
-        *ngFor="let _ of [0, 0, 0, 0, 0, 0]; let i = index" 
-        class="progress-led"
-        [class.on]="i < (current_challenge - 1)">
-        {{ (i < (current_challenge - 1)) ? 'X' : 'O' }}
+      <!-- Mostramos 6 LEDs para los 6 niveles aleatorios. El tutorial no cuenta aquí o cuenta aparte -->
+      <!-- current_challenge_index va de 0 (tutorial) a 6 (fin). -->
+      <!-- Si index=0 (tutorial), 0 leds on. Si index=1 (nivel 1), 0 leds on. Si index=2 (nivel 2), 1 led on. -->
+      <div *ngFor="let _ of [0, 0, 0, 0, 0, 0]; let i = index" class="progress-led"
+        [class.on]="i < (current_challenge_index - 5)">
+        {{ (i < (current_challenge_index - 5)) ? 'X' : 'O' }} </div>
       </div>
+      <small *ngIf="current_challenge_index < 5">Completando Tutorial...</small>
     </div>
-  </div>
 
-</div>
+  </div>

@@ -41,6 +41,17 @@ h2, h3, h4 {
     color: $color-on; // Título del reto en verde
   }
 
+  .expression-display {
+    background-color: #222;
+    border: 1px solid #555;
+    padding: 1rem;
+    margin: 1rem 0;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.5rem;
+    color: #FFF;
+    letter-spacing: 2px;
+  }
+
   .instruction {
     font-size: 1.1rem;
     font-style: italic;
@@ -133,7 +144,7 @@ h2, h3, h4 {
     font-family: monospace;
     font-size: 2rem;
     font-weight: bold;
-
+    
     .progress-led {
       color: #555;
       &.on {
@@ -179,5 +190,24 @@ h2, h3, h4 {
       color: #000;
       font-weight: bold;
     }
+  }
+}
+
+.restart-btn {
+  background-color: transparent;
+  color: #39ff14;
+  border: 2px solid #39ff14;
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  cursor: pointer;
+  font-family: monospace;
+  text-transform: uppercase;
+  font-weight: bold;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: #39ff14;
+    color: black;
+    box-shadow: 0 0 15px #39ff14;
   }
 }
