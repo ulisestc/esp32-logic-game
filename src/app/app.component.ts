@@ -19,29 +19,26 @@ interface Challenge {
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnDestroy, OnInit {
-  // --- Configuración y Estado ---
-  esp32_ip: string = '192.168.1.100'; // IP por defecto
+  // Configuración de red
+  esp32_ip: string = '192.168.1.100'; 
   is_connected: boolean = false;
   is_polling: boolean = false;
-  showModal: boolean = false; // Controla el modal de "Siguiente Nivel"
+  showModal: boolean = false; 
 
   private pollSubscription: Subscription | null = null;
 
-  // --- Estado del Juego (FSM) ---
-  // current_challenge_index: 0-4 son tutoriales. 5-10 son retos aleatorios.
+  // Estado del juego
   current_challenge_index = 0;
   last_led_output_state: boolean | null = null;
   button_states: ButtonStatus = { boton_a: false, boton_b: false, boton_c: false };
-  current_led_output: boolean = false; // El estado lógico (virtual)
+  current_led_output: boolean = false; 
 
-  // --- Pines Físicos ---
+  // Definición de pines físicos
   readonly led_pins_progress = [13, 25, 21, 32, 23, 26];
   readonly led_pin_status = 27;
 
-  // --- Definición de Retos ---
   challenges: Challenge[] = [];
 
-  // Reto de finalización
   readonly victoryChallenge: Challenge = {
     nombre: '¡Juego Completado!',
     expression_display: 'WIN',
@@ -58,7 +55,7 @@ export class AppComponent implements OnDestroy, OnInit {
   }
 
   initializeGame() {
-    // --- FASE 1: TUTORIAL INTERACTIVO ---
+    // Fase de tutorial
     const tutorials: Challenge[] = [
       {
         nombre: 'Tutorial 1: El Inversor (NOT)',
@@ -66,7 +63,7 @@ export class AppComponent implements OnDestroy, OnInit {
         instruccion: 'Observa el LED. Pulsa el interruptor A y observa cómo cambia el LED.',
         evaluate: (a, b, c) => !a,
         explicacion: 'El operador "!" (NOT) invierte el valor de la entrada. \nCuando A está APAGADO, !A es VERDADERO y el LED se enciende.\nCuando A está ENCENDIDO, !A es FALSO y el LED se apaga.\n¡Experimenta pulsando A!',
-        led_esperado: '---', // No hay un estado "esperado" fijo, es para observar el cambio.
+        led_esperado: '---', 
         manual_advance: true
       },
       {
@@ -107,14 +104,12 @@ export class AppComponent implements OnDestroy, OnInit {
       }
     ];
 
-    // --- FASE 2: RETOS ALEATORIOS ---
-    // Generar 6 retos aleatorios
+    // Fase de retos aleatorios
     const randomChallenges = this.generateRandomChallenges(6);
 
     this.challenges = [...tutorials, ...randomChallenges];
     this.current_challenge_index = 0;
 
-    // Reiniciar estado visual
     this.current_led_output = false;
     this.last_led_output_state = null;
     this.showModal = false;
@@ -122,7 +117,6 @@ export class AppComponent implements OnDestroy, OnInit {
 
   restartGame() {
     this.initializeGame();
-    // Forzar actualización de LEDs físicos
     this.resetAllLeds();
   }
 
@@ -135,8 +129,7 @@ export class AppComponent implements OnDestroy, OnInit {
   }
 
   createRandomChallenge(levelNum: number): Challenge {
-    // Generador simple de expresiones
-    const ops = ['&&', '||', '^']; // AND, OR, XOR
+    const ops = ['&&', '||', '^']; 
     const vars = ['A', 'B', 'C'];
 
     const pick = <T>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
@@ -146,13 +139,11 @@ export class AppComponent implements OnDestroy, OnInit {
     let evalFunc: (a: boolean, b: boolean, c: boolean) => boolean = () => false;
     let description = '';
 
-    // Aumentar complejidad con el nivel
     const complexity = levelNum <= 2 ? 1 : (levelNum <= 4 ? 2 : 3);
 
     let isValid = false;
     while (!isValid) {
       if (complexity === 1) {
-        // Simple: A op B
         const v1 = pick(vars);
         let v2 = pick(vars);
         while (v1 === v2) v2 = pick(vars);
@@ -167,7 +158,6 @@ export class AppComponent implements OnDestroy, OnInit {
           return this.evalOp(op, val1, val2);
         };
       } else if (complexity === 2) {
-        // Negación: !A op B  o  A op !B
         const v1 = pick(vars);
         let v2 = pick(vars);
         while (v1 === v2) v2 = pick(vars);
@@ -190,13 +180,10 @@ export class AppComponent implements OnDestroy, OnInit {
           return this.evalOp(op, val1, val2);
         };
       } else {
-        // 3 variables: A op B op C  o  (A op B) op C
         const op1 = pick(ops);
         const op2 = pick(ops);
-        // Mezclamos orden
         const vs = ['A', 'B', 'C'].sort(() => Math.random() - 0.5);
 
-        // A veces usamos paréntesis
         if (coinFlip()) {
           exprStr = `(${vs[0]} ${op1} ${vs[1]}) ${op2} ${vs[2]}`;
           description = `Resuelve primero el paréntesis: (${vs[0]} ${this.getOpName(op1)} ${vs[1]}).`;
@@ -226,7 +213,6 @@ export class AppComponent implements OnDestroy, OnInit {
         }
       }
 
-      // Validar que no se resuelva automáticamente (todo FALSE => FALSE)
       if (evalFunc(false, false, false) === false) {
         isValid = true;
       }
@@ -252,32 +238,25 @@ export class AppComponent implements OnDestroy, OnInit {
   evalOp(op: string, v1: boolean, v2: boolean): boolean {
     if (op === '&&') return v1 && v2;
     if (op === '||') return v1 || v2;
-    if (op === '^') return (v1 ? 1 : 0) + (v2 ? 1 : 0) === 1; // XOR
+    if (op === '^') return (v1 ? 1 : 0) + (v2 ? 1 : 0) === 1; 
     return false;
   }
 
-  /**
-   * Inicia el Polling. Se llama desde el botón "Conectar".
-   */
   startPolling() {
     if (this.is_polling) return;
 
     this.is_polling = true;
     this.esp32.setIp(this.esp32_ip);
 
-    // Apagar todos los LEDs físicos al iniciar
     this.resetAllLeds();
 
-    // Iniciar el bucle de polling (cada 200ms)
-    this.pollSubscription = timer(0, 200) // 0ms de espera, luego cada 200ms
+    this.pollSubscription = timer(0, 200) 
       .pipe(
         switchMap(() =>
           this.esp32.getStatus().pipe(
             catchError(err => {
               this.is_connected = false;
-              // Resetear botones virtuales si hay error
               this.button_states = { boton_a: false, boton_b: false, boton_c: false };
-              // throw err; // Detener este ciclo y esperar al siguiente timer
               return EMPTY;
             })
           )
@@ -287,46 +266,24 @@ export class AppComponent implements OnDestroy, OnInit {
         this.is_connected = true;
         this.button_states = status;
 
-        // ¡Aquí se ejecuta la lógica del juego!
         this.check_challenge_logic();
       });
   }
 
-  /**
-   * Detiene el polling al cerrar (buena práctica)
-   */
   ngOnDestroy() {
     this.pollSubscription?.unsubscribe();
-    this.resetAllLeds(); // Apagar todo al salir
+    this.resetAllLeds(); 
   }
 
-  /**
-   * Apaga todos los LEDs físicos.
-   */
   resetAllLeds() {
     const allPins = [...this.led_pins_progress, this.led_pin_status];
     allPins.forEach(pin => {
-      // Usamos .subscribe() porque es 'fire and forget'
       this.esp32.setLed(pin, false).subscribe();
     });
   }
 
-  /**
-   * Actualiza la barra de progreso física
-   */
   updatePhysicalProgressBar(completed_challenges: number) {
     this.led_pins_progress.forEach((pin, index) => {
-      // Ajuste para que los LEDs representen los 6 niveles aleatorios
-      // El tutorial tiene 5 pasos. 
-      // Si current_challenge_index < 5, estamos en tutorial.
-      // Si current_challenge_index >= 5, estamos en niveles aleatorios.
-      // completed_challenges es el índice del reto que ACABAMOS de completar + 1.
-
-      // Queremos que los LEDs se enciendan cuando completamos niveles aleatorios.
-      // Nivel aleatorio 1 es index 5.
-      // Si completamos index 5, completed_challenges = 6.
-      // Queremos encender LED 0.
-
       const tutorialCount = 5;
       const levelsCompleted = Math.max(0, completed_challenges - tutorialCount);
 
@@ -335,14 +292,9 @@ export class AppComponent implements OnDestroy, OnInit {
     });
   }
 
-  /**
-   * La LÓGICA CENTRAL (FSM)
-   */
   check_challenge_logic() {
-    // Si el modal está abierto, pausamos la lógica
     if (this.showModal) return;
 
-    // Verificar si ya terminamos todo
     if (this.current_challenge_index >= this.challenges.length) {
       this.current_led_output = false;
       return;
@@ -354,21 +306,17 @@ export class AppComponent implements OnDestroy, OnInit {
     const b = this.button_states.boton_b;
     const c = this.button_states.boton_c;
 
-    // Evaluar la expresión del reto actual
     const led_output = currentChallenge.evaluate(a, b, c);
 
     const success = led_output === true;
 
-    // Actualizar el LED virtual (GUI)
     this.current_led_output = led_output;
 
-    // Actualizar el LED de estado físico (solo si cambia)
     if (led_output !== this.last_led_output_state) {
       this.esp32.setLed(this.led_pin_status, led_output).subscribe();
       this.last_led_output_state = led_output;
     }
 
-    // --- Lógica de Éxito ---
     if (success) {
       if (currentChallenge.manual_advance) {
         return;
@@ -376,25 +324,17 @@ export class AppComponent implements OnDestroy, OnInit {
 
       console.log(`Reto ${this.current_challenge_index} completado!`);
 
-      // 1. Actualizar barra de progreso física
       this.updatePhysicalProgressBar(this.current_challenge_index + 1);
 
-      // 2. Mostrar el modal (esto pausa la lógica)
       this.showModal = true;
     }
   }
 
-  /**
-   * Se llama desde el botón del modal
-   */
   advanceToNextLevel() {
-    // 1. Ocultar el modal (esto reanuda la lógica)
     this.showModal = false;
 
-    // 2. Avanzar al siguiente reto
     this.current_challenge_index += 1;
 
-    // 3. Forzar reseteo del LED físico
     this.last_led_output_state = null;
     this.esp32.setLed(this.led_pin_status, false).subscribe();
     this.current_led_output = false;

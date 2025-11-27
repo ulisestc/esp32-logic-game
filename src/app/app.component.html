@@ -25,7 +25,7 @@
     </div>
   </div>
 
-  <!-- Frame del Reto Actual -->
+  <!-- Reto Actual -->
   <div class="card challenge-frame" *ngIf="current_challenge_index < challenges.length">
     <h2>{{ currentChallengeObj.nombre }}</h2>
 
@@ -45,7 +45,7 @@
     </div>
   </div>
 
-  <!-- Frame de Victoria Final -->
+  <!-- Victoria Final -->
   <div class="card challenge-frame" *ngIf="current_challenge_index >= challenges.length">
     <h2 class="victory">{{ victoryChallenge.nombre }}</h2>
     <p class="instruction">{{ victoryChallenge.instruccion }}</p>
@@ -88,9 +88,7 @@
   <div class="card progress-frame">
     <h4>Progreso (Niveles Aleatorios)</h4>
     <div class="progress-bar">
-      <!-- Mostramos 6 LEDs para los 6 niveles aleatorios. El tutorial no cuenta aquí o cuenta aparte -->
-      <!-- current_challenge_index va de 0 (tutorial) a 6 (fin). -->
-      <!-- Si index=0 (tutorial), 0 leds on. Si index=1 (nivel 1), 0 leds on. Si index=2 (nivel 2), 1 led on. -->
+      <!-- Indicadores de progreso para los niveles aleatorios -->
       <div *ngFor="let _ of [0, 0, 0, 0, 0, 0]; let i = index" class="progress-led"
         [class.on]="i < (current_challenge_index - 5)">
         {{ (i < (current_challenge_index - 5)) ? 'X' : 'O' }} </div>
